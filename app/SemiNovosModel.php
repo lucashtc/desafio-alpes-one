@@ -19,7 +19,12 @@ class SemiNovosModel extends Model
         return new Client(['base_uri' => self::url]);
     }
     
-    public function filterCars($request){
+    /**
+     * retorna json com base na busca
+     * @param Illuminate\Http\Request
+     * @return json
+     */
+    public function filterCars(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse {
 
         $client = $this->newClient();
         $urlBusca = '';
