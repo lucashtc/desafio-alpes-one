@@ -8,6 +8,8 @@ use Facade\FlareClient\Http\Response;
 
 class SemiNovosController extends Controller
 {
+    const contentJson = array('Content-Type' => 'application/json;charset=utf8');
+
     /**
      * retorna busca de veiculos
      * @return \Illuminate\Http\JsonResponse
@@ -16,11 +18,11 @@ class SemiNovosController extends Controller
         
         // Parametros obrigatorios
         if(!$request->veiculo){
-            return response()->json(['msg' => 'veiculo não pode ser vazio'],500,array('Content-Type' => 'application/json;charset=utf8'));
+            return response()->json(['msg' => 'veiculo não pode ser vazio'],500,self::contentJson);
         }
         $semi = new SemiNovosModel();
         $result =  $semi->filterCars($request);
-        return Response()->json($result,200,array('Content-Type' => 'application/json;charset=utf8'));
+        return Response()->json($result,200,self::contentJson);
     }
 
 
@@ -32,11 +34,11 @@ class SemiNovosController extends Controller
     public function detalhes(Request $request): \Illuminate\Http\JsonResponse {
         $id = $request->veiculo;
         if (!$id){
-            return Response()->json(['msg' => 'id não pode ser vazio'],500,array('Content-Type' => 'application/json;charset=utf8'));
+            return Response()->json(['msg' => 'id não pode ser vazio'],500,self::contentJson);
         }
         $semi = new SemiNovosModel();
         $detalhes = $semi->detalhes($id);
 
-        return Response()->json($detalhes,200,array('Content-Type' => 'application/json;charset=utf8'));
+        return Response()->json($detalhes,200,self::contentJson);
     }
 }
