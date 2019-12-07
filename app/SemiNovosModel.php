@@ -99,11 +99,11 @@ class SemiNovosModel extends Model
             return $crawler->text();
         });
         $result['nome'] = $this->trataCrawler($result['nome'],0);
-        
+
         $result['valor'] = $crawler->filter('.price')->each(function(Crawler $crawler){
             return $crawler->text();
         });
-        $result['price'] = $this->trataCrawler($result['price'],0);
+        $result['valor'] = $this->trataCrawler($result['valor'],0);
 
         $detalhes = ['Ano/modelo','Tipo de transmissão','Portas','Tipo de combustível','Cor do veículo','Final da placa','Aceita troca'];
         foreach($detalhes as $d) {
