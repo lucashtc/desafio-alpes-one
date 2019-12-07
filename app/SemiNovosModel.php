@@ -22,11 +22,10 @@ class SemiNovosModel extends Model
     /**
      * retorna json com base na busca
      * @param Illuminate\Http\Request
-     * @return json
+     * @return array
      */
-    public function filterCars(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse {
+    public function filterCars(\Illuminate\Http\Request $request){
 
-        $client = $this->newClient();
         $urlBusca = '';
         
         // Define tipo de veiculo
@@ -41,7 +40,7 @@ class SemiNovosModel extends Model
             $urlBusca = '/caminhao';
         }
 
-        $urlBusca .= $request->marca;
+        $urlBusca .= $request->marca ? '/' . $request->marca : '';
 
         $urlBusca .= $request->modelo ? '/' . $request->modelo : '';
         $urlBusca .= $request->ano ? '/ano-' . $request->ano : '';
@@ -52,21 +51,15 @@ class SemiNovosModel extends Model
             }
             $urlBusca .= '/preco-' . $request->preco;
         }
-        $urlBusca .= $request->estado ? '/estado-' . $request->estado : '';
-    
-        $urlBusca .= $request->origem ? '/estado-' . $request->origem : '';
         
-        if($request->financiamento){
-            $urlBusca .= $request->financiamento == 'com financiamento' ? '/financiamento-' . '1' : '';
-            $urlBusca .= $request->financiamento == 'sem financiamento' ? '/financiamento-' . '2' : '';
-        }
-        if($request->troca){
-            $urlBusca .= $request->troca == 'com financiamento' ? '/financiamento-' . '1' : '';
-            $urlBusca .= $request->troca ? '/troca-' . '4' : '';
-        }
- 
+        $urlBusca .= $request->has('revenda-origem')  ? '/revenda-origem' : '';
+        $urlBusca .= $request->has('particular-origem')  ? '/particular-origem' : '';
+        $urlBusca .= $request->has('novo-estado')  ? '/novo-estado' : '';
+        $urlBusca .= $request->has('seminovo-estado')  ? '/seminovo-estado' : '';
+
         $urlBusca .= $request->registrosPagina ? '?registrosPagina=' . $request->registrosPagina : '';
-        
+        echo $urlBusca;
+        $client = $this->newClient();
         $response = $client->request('GET', $urlBusca);
 
         if($response->getStatusCode() != 200){
@@ -86,10 +79,56 @@ class SemiNovosModel extends Model
             $carName = count($carName) > 0 ? $carName[0] : '';
             return ['car_name' => $carName,'id' => $id];
         });
-        return response()->json($result,200,array('Content-Type' => 'application/json;charset=utf8'));
+        return $result;
     }
 
-    public function detalhes($id) {
+    /**
+     * Retorna detalhes do veiculo escolhido
+     * @param string
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function detalhes(string $id) {
+        $client = $this->newClient();
+        //echo $id;
+        $response = $client->request('GET',$id);
+        $html = $response->getBody();
 
+        $crawler = new Crawler((string) $html);
+        $result = [];
+        $result['nome'] = $crawler->filter('.mb-0')->each(function(Crawler $crawler){
+            return $crawler->text();
+        });
+        $result['nome'] = $this->trataCrawler($result['nome'],0);
+        
+        $result['valor'] = $crawler->filter('.price')->each(function(Crawler $crawler){
+            return $crawler->text();
+        });
+        $result['price'] = $this->trataCrawler($result['price'],0);
+
+        $detalhes = ['Ano/modelo','Tipo de transmissão','Portas','Tipo de combustível','Cor do veículo','Final da placa','Aceita troca'];
+        foreach($detalhes as $d) {
+            $result['detalhes'][$d] = $t = $crawler->filter('[title="'. $d .'"]')->each(function(Crawler $c){
+                return $c->text();
+            });
+        }
+        
+        $result['acessorios'] = $crawler->filter('.description-print')->each(function(Crawler $c){
+            return $c->text();
+        });
+
+        return $result;
+    }
+
+    /**
+     * retona posição desejada caso encontre array > 1
+     * @param array $crawler
+     * @param int $i posição que deja que retorne
+     * @return string|array
+     */
+    private function trataCrawler(array $crawler, $i) {
+        if(count($crawler) > 0) {
+            return $crawler[$i];
+        }
+        return $crawler;
     }
 }
