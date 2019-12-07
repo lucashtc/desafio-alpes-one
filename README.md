@@ -6,18 +6,32 @@
 git clone https://github.com/lucashtc/desafio-alpes-one 
 ```
 
+### Instale as dependencias
 ```bash
 composer install
 ```
 
-## Laravel Sponsors
+### Execute o servidor embutido do Laravel
+```bash
+php artisan serve
+``` 
+## endpoints
+### [GET]
+api/busca/?veiculo={tipo do veiculo}&marca={marca}particular-origem/revenda-origem/novo-estado/seminovo-estado&registrosPagina={20}
+Exemplo: localhost:8000/busca/?veiculo=carro&marca=fiat&particular-origem&revenda-origem&novo-estado&seminovo-estado/&registrosPagina=100
 
+### Parametros
+- particular-origem string
+- revenda-origem string
+- novo-estado  string
+- seminovo-estado string
+- veiculo string('carro','caminhao','moto'|obrigatorio)
+- estado string('seminovo','novo')
+- modelo string
+- ano string(formato yyyy-yyyy)
+- preco string(formato int-int)
+- financiamento string('com financiamento','sem financiamento')
 
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+[GET]
+api/detalhes/?id=id_do_carro
+Exemplo: api/detalhes/?id=bmw-320i-2008-2009--2237820
